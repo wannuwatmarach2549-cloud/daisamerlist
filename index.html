@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>DAISAMER SYSTEM - ULTRA WIDE & SCROLL</title>
+    <meta name="description" content="DAISAMER SYSTEM - Official Community Member Database">
+    <meta property="og:title" content="DAISAMER SYSTEM">
+    <meta property="og:description" content="Explore our community members and join the system.">
+    <meta property="og:image" content="URL_รูปปกของคุณ">
+    <link rel="icon" type="image/png" href="URL_โลโก้ของคุณ">
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-bg: #030303;
+            --card-bg: rgba(15, 15, 15, 0.65);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-silver: linear-gradient(180deg, #ffffff 0%, #777777 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: var(--primary-bg);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Particle System --- */
+        #particle-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- System Clock --- */
+        .system-status {
+            position: absolute;
+            top: 25px; right: 40px;
+            text-align: right;
+            font-family: 'JetBrains+Mono', monospace;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 10;
+            letter-spacing: 2px;
+        }
+
+        /* --- Music Controller --- */
+        .music-controller {
+            position: absolute;
+            top: 25px; left: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .music-controller:hover { opacity: 1; }
+
+        .music-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            transition: 0.3s;
+        }
+
+        .music-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+            transform: scale(1.1);
+        }
+
+        .slider-bar {
+            -webkit-appearance: none;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .slider-bar::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+        .progress-slider { width: 120px; }
+        .volume-slider { width: 60px; }
+
+        .bg-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20vw;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.015);
+            white-space: nowrap;
+            z-index: 0;
+            user-select: none;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* --- LANDING --- */
+        #landing-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .logo-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 80px;
+            letter-spacing: 15px;
+            background: var(--accent-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+        }
+
+        .enter-btn {
+            margin-top: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 18px 80px;
+            font-size: 14px;
+            letter-spacing: 8px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .enter-btn:hover::before { left: 100%; }
+        .enter-btn:hover {
+            background: #fff; color: #000; box-shadow: 0 0 30px rgba(255, 255, 255, 0.3); transform: translateY(-2px);
+        }
+
+        /* --- MEMBER PAGE --- */
+        #member-page {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            padding: 20px;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .member-container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02);
+            position: relative;
+        }
+
+        .member-header {
+            padding: 40px 50px 15px 50px;
+            text-align: center;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 35px; left: 40px;
+            background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #888;
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 11px;
+            letter-spacing: 2px; font-weight: 600; transition: all 0.3s ease; z-index: 10;
+        }
+
+        .back-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; border-color: rgba(255, 255, 255, 0.3); transform: translateX(-3px); }
+
+        .member-header h2 {
+            font-family: 'Orbitron', sans-serif; letter-spacing: 10px; font-size: 32px;
+            margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .search-container { position: relative; width: 100%; }
+
+        .search-box {
+            width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color);
+            padding: 14px 25px; color: #fff; border-radius: 12px; font-size: 16px; outline: none;
+            transition: 0.3s; letter-spacing: 1px;
+        }
+
+        .search-box:focus { border-color: rgba(255,255,255,0.4); box-shadow: 0 0 20px rgba(255,255,255,0.05); background: rgba(0, 0, 0, 0.5); }
+
+        /* --- Filter Buttons --- */
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #888;
+            padding: 6px 15px;
+            border-radius: 8px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+
+        .filter-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        .member-count {
+            text-align: right; margin-top: 10px; font-size: 10px; color: #888;
+            font-family: 'JetBrains+Mono', monospace; letter-spacing: 2px; padding-right: 5px;
+        }
+
+        .member-list {
+            overflow-y: auto; flex-grow: 1; padding: 15px 40px 40px 40px;
+            scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+        }
+
+        .member-list::-webkit-scrollbar { width: 6px; }
+        .member-list::-webkit-scrollbar-track { background: transparent; }
+        .member-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+        .member-list::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+        .member-item {
+            display: flex; align-items: center; padding: 20px 25px; margin-bottom: 12px;
+            border-radius: 16px; background: rgba(255, 255, 255, 0.01); border: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); animation: slideUp 0.5s ease backwards;
+        }
+
+        .member-item:hover {
+            background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px) scale(1.01); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .avatar {
+            width: 70px; height: 70px; background: #1a1a1a; border-radius: 50%;
+            margin-right: 25px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.08); flex-shrink: 0;
+        }
+
+        .avatar img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .member-item:hover .avatar img { transform: scale(1.15); }
+
+        .member-info { flex-grow: 1; }
+        .member-name { font-size: 18px; font-weight: 700; letter-spacing: 1px; color: #fff; margin-bottom: 6px; }
+        .member-rank {
+            font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 2px;
+            font-weight: 600; padding: 4px 10px; background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px; display: inline-block; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* ตกแต่งสี Rank พิเศษ */
+        .rank-leader { color: #e6c200; background: rgba(230, 194, 0, 0.1); border-color: rgba(230, 194, 0, 0.2); }
+        .rank-coleader { color: #a8b2d1; background: rgba(168, 178, 209, 0.1); border-color: rgba(168, 178, 209, 0.2); }
+        .rank-staff { color: #82e0aa; background: rgba(130, 224, 170, 0.1); border-color: rgba(130, 224, 170, 0.2); }
+        .rank-member { color: #e5e7e9; background: rgba(229, 231, 233, 0.1); border-color: rgba(229, 231, 233, 0.2); }
+
+        .fb-icon {
+            opacity: 0.3; cursor: pointer; transition: all 0.3s; text-decoration: none;
+            color: #fff; font-size: 22px; width: 45px; height: 45px; display: flex;
+            justify-content: center; align-items: center; border-radius: 50%;
+            background: rgba(255,255,255,0.03); font-family: serif; font-weight: bold; font-style: italic;
+        }
+
+        .fb-icon:hover { opacity: 1; color: #fff; background: #1877F2; transform: scale(1.1) rotate(-5deg); box-shadow: 0 0 15px rgba(24, 119, 242, 0.5); }
+        .empty-state { text-align: center; padding: 40px 0; color: #666; font-style: italic; letter-spacing: 2px; display: none; }
+
+        /* --- Footer --- */
+        footer {
+            position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between;
+            padding: 0 50px; font-size: 11px; z-index: 2; font-weight: 300;
+        }
+        .join-btn { color: #fff; text-decoration: none; letter-spacing: 3px; opacity: 0.4; transition: all 0.3s ease; cursor: pointer; }
+        .join-btn:hover { opacity: 1; color: #5865F2; text-shadow: 0 0 15px rgba(88, 101, 242, 0.8); transform: scale(1.05); }
+
+        /* --- ANIMATIONS & UTILS --- */
+        .hidden { display: none !important; }
+        .fade-in-active { display: flex !important; animation: revealPage 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes revealPage { 0% { opacity: 0; transform: scale(0.95) translateY(20px); filter: blur(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- RESPONSIVE MOBILE --- */
+        @media (max-width: 768px) {
+            .logo-title { font-size: 45px; letter-spacing: 8px; }
+            .bg-text { font-size: 30vw; }
+            .member-container { width: 92%; max-height: 88vh; border-radius: 16px; }
+            .back-btn { top: 20px; left: 20px; padding: 6px 12px; font-size: 10px; }
+            .member-header { padding: 50px 20px 10px 20px; } 
+            .member-header h2 { font-size: 24px; letter-spacing: 6px; margin-bottom: 15px; }
+            .filter-container { gap: 6px; }
+            .filter-btn { padding: 5px 10px; font-size: 9px; }
+            .member-list { padding: 10px 20px 30px 20px; }
+            .member-item { padding: 15px; flex-direction: column; text-align: center; position: relative; }
+            .avatar { margin: 0 0 15px 0; width: 80px; height: 80px; }
+            .fb-icon { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; font-size: 18px;}
+            footer { padding: 0 20px; flex-direction: column; align-items: center; gap: 10px; bottom: 15px;}
+            .system-status { top: 15px; right: 20px; font-size: 11px; }
+            .music-controller { top: 15px; left: 20px; gap: 8px; }
+            .progress-slider { width: 60px; }
+            .volume-slider { width: 40px; }
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="bgMusic" loop>
+        <source src="Sexski - YSL GIRL Feat MEYOU Official MV.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-controller">
+        <span style="font-size: 10px; font-family: 'JetBrains+Mono', monospace; letter-spacing: 1px;">Sexski - YSL GIRL</span>
+        <button id="playPauseBtn" class="music-btn" onclick="toggleMusic()">&#9658;</button> 
+        <input type="range" id="progressSlider" class="slider-bar progress-slider" min="0" max="100" value="0" step="0.1" oninput="seekMusic()">
+        <span style="font-size: 8px; font-family: 'JetBrains+Mono', monospace; opacity: 0.6; margin-left: 5px;">VOL</span>
+        <input type="range" id="volumeSlider" class="slider-bar volume-slider" min="0" max="1" step="0.01" value="0.3" oninput="changeVolume()">
+    </div>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="system-status">
+        <div id="clock">00:00:00</div>
+        <div style="font-size: 10px; opacity: 0.5;">DAISAMER SYSTEM</div>
+    </div>
+
+    <div class="bg-text" id="bg-logo">DAISAMER</div>
+
+    <section id="landing-page">
+        <h1 class="logo-title">DAISAMER</h1>
+        <button class="enter-btn" onclick="enterSystem()">ENTER SYSTEM</button>
+    </section>
+
+    <section id="member-page">
+        <div class="member-container">
+            <div class="member-header">
+                <button class="back-btn" onclick="backToHome()">&#8592; BACK</button>
+                
+                <h2>DAISAMER</h2>
+                
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-box" placeholder="SEARCH MEMBER..." oninput="applyFilters()">
+                </div>
+
+                <div class="filter-container">
+                    <button class="filter-btn active" onclick="setFilter('ALL', this)">ALL</button>
+                    <button class="filter-btn" onclick="setFilter('LEADER', this)">LEADER</button>
+                    <button class="filter-btn" onclick="setFilter('CO-LEADER', this)">CO-LEADER</button>
+                    <button class="filter-btn" onclick="setFilter('STAFF', this)">STAFF</button>
+                    <button class="filter-btn" onclick="setFilter('MEMBER', this)">MEMBER</button>
+                </div>
+
+                <div id="memberCountDisplay" class="member-count">TOTAL MEMBERS: 0</div>
+            </div>
+
+            <div class="member-list" id="memberListContainer"></div>
+            
+            <div id="emptyState" class="empty-state">
+                - NO MEMBER FOUND -
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <a href="https://discord.gg/TgsmSxunaa" target="_blank" class="join-btn">JOIN COMMUNITY</a>
+        <div style="letter-spacing: 2px; opacity: 0.4;">DAISAMER &copy; 2026</div>
+    </footer>
+
+    <script>
+        // --- 1. ระบบเครื่องเล่นเพลง ---
+        const bgMusic = document.getElementById('bgMusic');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressSlider = document.getElementById('progressSlider');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        bgMusic.volume = volumeSlider.value;
+
+        function toggleMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                playPauseBtn.innerHTML = '&#10074;&#10074;'; 
+            } else {
+                bgMusic.pause();
+                playPauseBtn.innerHTML = '&#9658;'; 
+            }
+        }
+        function changeVolume() { bgMusic.volume = volumeSlider.value; }
+        function seekMusic() {
+            const seekTime = (progressSlider.value / 100) * bgMusic.duration;
+            bgMusic.currentTime = seekTime;
+        }
+
+        bgMusic.addEventListener('timeupdate', () => {
+            if (!isNaN(bgMusic.duration) && document.activeElement !== progressSlider) {
+                progressSlider.value = (bgMusic.currentTime / bgMusic.duration) * 100;
+            }
+        });
+        bgMusic.addEventListener('ended', () => {
+            playPauseBtn.innerHTML = '&#9658;';
+            progressSlider.value = 0;
+        });
+
+        // --- 2. จัดการข้อมูลสมาชิก ---
+        const members = [
+            { name: "WINWILL DAISAMER", rank: "LEADER", fb: "https://www.facebook.com/keeps.i.2025/", img: "https://cdn.discordapp.com/attachments/1393293878047674453/1468589203586547886/605681236_122157528248684370_2642039516800595315_n.jpg?ex=698491c7&is=69834047&hm=7b4ef15c8f2b7fbc2d6ac22c76ba0d4343f98a89ebe63fa51e50c48a649280eb&" },
+            { name: "MINE DAISAMER", rank: "LEADER", fb: "https://www.facebook.com/profile.php?id=61576904056487", img: "https://cdn.discordapp.com/attachments/1390736511250595850/1468582557158477986/image.png?ex=69848b96&is=69833a16&hm=705a7ca6f5cfdaff5896787858a917516bfd755c238cc5efe6cdf926eea932db&" },
+            { name: "CALI DAISAMER", rank: "CO-LEADER", fb: "https://www.facebook.com/cali.sun.290867", img: "https://media.discordapp.net/attachments/1393293878047674453/1468579613268508786/5.jpg?ex=698488d8&is=69833758&hm=d986e67acfc44fe45c3f4b6b1eec534a422aa7fd5893c34f4057b6c655b14bac&=&format=webp&width=856&height=856" },
+            { name: "LOSERR DAISAMER", rank: "CO-LEADER", fb: "https://www.facebook.com/Glay.Noble.39", img: "https://cdn.discordapp.com/attachments/1390736511250595850/1468581858127384819/486789151_1142317394607212_4604414435284355014_n.png?ex=69848aef&is=6983396f&hm=de4c504c093eb6967798f66f607bfc8e0d99db1f03ee6d8420b5e81a26158e0a&" },
+            { name: "POLO DAISAMER", rank: "CO-LEADER", fb: "https://www.facebook.com/caesar.jantra", img: "https://cdn.discordapp.com/attachments/1393293878047674453/1468593551725302063/564127283_122169822674488810_2964944543567817592_n.jpg?ex=698495d3&is=69834453&hm=adbd8400fc6602d8d694c03f142a3438a59f7388731f88fa64869b57c2f33ba4&" },
+            { name: "WASSANA DAISAMER", rank: "CO-LEADER", fb: "https://www.facebook.com/natt.hawat.593918/photos", img: "https://cdn.discordapp.com/attachments/1393293878047674453/1468594061052219438/597617181_122188935248594219_8530486848840369339_n.jpg?ex=6984964d&is=698344cd&hm=223165827ec1fe64a495e5c319067b2236e54e040eaaaca7d7b461debd610841&" },
+            { name: "LUCKY DAISAMER", rank: "CO-LEADER", fb: "https://www.facebook.com/profile.php?id=61575509423937", img: "" },
+            { name: "SEMI DAISAMER", rank: "CO-LEADER", fb: "https://www.facebook.com/koryhom.senhigh", img: "" },
+            { name: "BOOM DAISAMER", rank: "CO-LEADER", fb: "https://www.facebook.com/Dextxr0", img: "https://cdn.discordapp.com/attachments/1393293878047674453/1468594978857947351/487339388_1235640854688584_3010520292575041976_n.jpg?ex=69849728&is=698345a8&hm=b674d45670cd64cd3a0544cd8c35898d30d7a34433c201b72dd895cba1ae89c5&" },
+            { name: "REFLEX DAISAMER", rank: "STAFF", fb: "https://www.facebook.com/profile.php?id=61583186631876", img: "https://media.discordapp.net/attachments/1460959312364048481/1468592636163002612/606024415_122112862635106221_3720719310931026377_n.jpg?ex=698494f9&is=69834379&hm=50dd9223865e53a14013a97f6fb50edcc9e41fd2d775db3a28052eb320f83281&=&format=webp&width=960&height=960" },
+            { name: "WHITE DAISAMER", rank: "STAFF", fb: "https://www.facebook.com/profile.php?id=61583186631876", img: "https://cdn.discordapp.com/attachments/1456666390953197792/1468593007434661960/271590_8.png?ex=69849552&is=698343d2&hm=9f094be632f61a60b0ae5fbcefbaebbc9f49a844e1cd76618719c3b2105fbeb4&" },
+            { name: "BEB DAISAMER", rank: "STAFF", fb: "#", img: "" },
+            { name: "DOM DAISAMER", rank: "STAFF", fb: "#", img: "" },
+            { name: "ZEE DAISAMER", rank: "STAFF", fb: "#", img: "" },
+            { name: "TAN DAISAMER", rank: "CO-LEADER", fb: "#", img: "" },
+            { name: "YUKI DAISAMER", rank: "STAFF", fb: "#", img: "" },
+            { name: "LEW DAISAMER", rank: "STAFF", fb: "#", img: "" },
+            { name: "SANTA DAISAMER", rank: "STAFF", fb: "#", img: "" },
+            { name: "VALEN DAISAMER", rank: "STAFF", fb: "#", img: "" },
+            { name: "JOKE DAISAMER", rank: "STAFF", fb: "#", img: "" },
+            { name: "KAKI DAISAMER", rank: "STAFF", fb: "#", img: "" }
+        ];
+
+        // --- จัดเรียงลำดับ Rank ---
+        const rankOrder = { "LEADER": 1, "CO-LEADER": 2, "STAFF": 3, "MEMBER": 4 };
+        members.sort((a, b) => (rankOrder[a.rank] || 99) - (rankOrder[b.rank] || 99));
+
+        let currentRankFilter = 'ALL'; 
+
+        function setFilter(rank, btnElement) {
+            currentRankFilter = rank;
+            
+            const btns = document.querySelectorAll('.filter-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            
+            const filteredMembers = members.filter(member => {
+                const matchesSearch = member.name.toLowerCase().includes(input) || member.rank.toLowerCase().includes(input);
+                const matchesRank = currentRankFilter === 'ALL' || member.rank === currentRankFilter;
+                return matchesSearch && matchesRank;
+            });
+
+            renderMembers(filteredMembers);
+        }
+
+        function renderMembers(data) {
+            const container = document.getElementById('memberListContainer');
+            const emptyState = document.getElementById('emptyState');
+            const countDisplay = document.getElementById('memberCountDisplay');
+            
+            container.innerHTML = ''; 
+            countDisplay.innerText = `TOTAL MEMBERS: ${data.length}`;
+
+            if (data.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                data.forEach((member, index) => {
+                    let rankClass = '';
+                    if (member.rank === 'LEADER') rankClass = 'rank-leader';
+                    else if (member.rank === 'CO-LEADER') rankClass = 'rank-coleader';
+                    else if (member.rank === 'STAFF') rankClass = 'rank-staff';
+                    else if (member.rank === 'MEMBER') rankClass = 'rank-member';
+
+                    let imgSrc = member.img ? member.img : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
+
+                    const itemHTML = `
+                        <div class="member-item" style="animation-delay: ${index * 0.03}s">
+                            <div class="avatar">
+                                <img src="${imgSrc}" alt="${member.name}" onerror="this.style.display='none'">
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">${member.name}</div>
+                                <div class="member-rank ${rankClass}">${member.rank}</div>
+                            </div>
+                            <a href="${member.fb}" target="_blank" class="fb-icon">f</a>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', itemHTML);
+                });
+            }
+        }
+
+        // --- 3. ระบบนาฬิกา ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+        }
+        setInterval(updateClock, 1000);
+        updateClock(); 
+
+        // --- 4. ฟังก์ชันสลับหน้า ---
+        function enterSystem() {
+            const landing = document.getElementById('landing-page');
+            const memberPage = document.getElementById('member-page');
+            const bgLogo = document.getElementById('bg-logo');
+
+            if (bgMusic.paused) { toggleMusic(); }
+
+            landing.style.opacity = '0';
+            landing.style.transform = 'scale(1.05)';
+            
+            setTimeout(() => {
+                landing.classList.add('hidden');
+                memberPage.classList.add('fade-in-active');
+                bgLogo.style.fontSize = '12vw';
+                bgLogo.style.opacity = '0.03';
+                
+                applyFilters(); 
+            }, 600);
+        }
+
+        function backToHome() {
+            const landing = document.getElementById('landing-page');
+            const memberPage = document.getElementById('member-page');
+            const bgLogo = document.getElementById('bg-logo');
+
+            document.getElementById('searchInput').value = '';
+            setFilter('ALL', document.querySelector('.filter-btn')); 
+
+            memberPage.classList.remove('fade-in-active');
+            landing.classList.remove('hidden');
+            
+            setTimeout(() => {
+                landing.style.opacity = '1';
+                landing.style.transform = 'scale(1)';
+                
+                bgLogo.style.fontSize = '20vw';
+                bgLogo.style.opacity = '0.015';
+            }, 50);
+        }
+
+        // --- 5. Particle System ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 70; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        
+        initParticles();
+        animate();
+    </script>
+</body>
+</html>
